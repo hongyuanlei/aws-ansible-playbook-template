@@ -31,12 +31,6 @@ Resources:
       SecurityGroupIds:
         - !Ref JenkinsSSHSecurityGroup
         - !Ref JenkinsConnectionSecurityGroup
-      BlockDeviceMappings:
-      - DeviceName: /dev/xvda
-        Ebs:
-          VolumeSize: '80'
-          VolumeType: gp2
-          DeleteOnTermination: 'true'
       Tags:
         - Key: Name
           Value: !Sub "${Project}-jenkins-${TraineeName}"
