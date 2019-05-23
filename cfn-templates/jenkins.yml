@@ -30,15 +30,76 @@ Parameters:
     Default: 1
 
 Resources:
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "jenkins-alb-${TraineeName}"
+      Scheme: internet-facing
+      Subnets:
+        - "Fn::ImportValue": !Sub "${Project}-public-subnet-a"
+        - "Fn::ImportValue": !Sub "${Project}-public-subnet-b"
+      SecurityGroups:
+        - Ref: ALBConnectionSecurityGroup
+
+  ALBConnectionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allowing Jenkins client connection
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+      - CidrIp: 0.0.0.0/0
+        IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+      VpcId:
+        "Fn::ImportValue": !Sub "${Project}-vpc-id"
+
+  ALBHTPPListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn:
+            Ref: ALBTargetGroup
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      Matcher:
+        HttpCode: 200
+      Name: !Sub 'target-group-${TraineeName}'
+      Protocol: HTTP
+      Port: 8080
+      HealthCheckPath: '/login'
+      UnhealthyThresholdCount: 3
+      VpcId:
+        "Fn::ImportValue": !Sub "${Project}-vpc-id"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 120
+
   JenkinsASGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - "Fn::ImportValue": !Sub "${Project}-private-subnet-a"
-        - "Fn::ImportValue": !Sub "${Project}-private-subnet-b"
+        - "Fn::ImportValue": !Sub "${Project}-public-subnet-a"
+        - "Fn::ImportValue": !Sub "${Project}-public-subnet-b"
       LaunchConfigurationName: !Ref JenkinsASLaunchConf
       MinSize: !Ref ASGMinSize
       MaxSize: !Ref ASGMaxSize
+      TargetGroupARNs:
+        - !Ref ALBTargetGroup
       Tags:
         - Key: Name
           Value: !Sub "${Project}-jenkins-${TraineeName}"
@@ -93,3 +154,4 @@ Resources:
         ToPort: 8080
       VpcId:
         "Fn::ImportValue": !Sub "${Project}-vpc-id"
+
