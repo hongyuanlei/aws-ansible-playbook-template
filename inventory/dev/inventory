@@ -1,0 +1,5 @@
+[vpc]
+vpc.dev
+
+[bastion]
+bastion.dev
