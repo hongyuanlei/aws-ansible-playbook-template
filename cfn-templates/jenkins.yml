@@ -77,6 +77,7 @@ Resources:
 
   JenkinsDomainName:
     Type: AWS::Route53::RecordSet
+    DependsOn: [JenkinsInstance]
     Properties:
       Name: !Sub "${TraineeName}.${PublicHostedZoneName}"
       HostedZoneName: !Ref PublicHostedZoneName
