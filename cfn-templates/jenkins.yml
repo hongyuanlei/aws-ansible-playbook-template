@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Jenkins Stack
+Parameters:
+  Project:
+    Type: String
+
+  TraineeName:
+    Type: String
+
+  PublicHostedZoneName:
+    Description: The Route53 Zone in which to create records
+    Type: String
+
+  AmiID:
+    Type: String
+    Description: 'AMI ID'
+
+  InstanceType:
+    Description: The Instance type which used to build stack.
+    Type: String
+
+Resources:
+  JenkinsInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      SubnetId:
+        "Fn::ImportValue": !Sub "${Project}-public-subnet-a"
+      ImageId: !Ref AmiID
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref Project
+      SecurityGroupIds:
+        - !Ref JenkinsSSHSecurityGroup
+        - !Ref JenkinsConnectionSecurityGroup
+      BlockDeviceMappings:
+      - DeviceName: /dev/xvda
+        Ebs:
+          VolumeSize: '80'
+          VolumeType: gp2
+          DeleteOnTermination: 'true'
+      Tags:
+        - Key: Name
+          Value: !Sub "${Project}-jenkins-${TraineeName}"
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash -ex
+          yum update -y
+          yum remove -y java-1.7.0-openjdk
+          yum install -y java-1.8.0
+          wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+          rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+          yum install -y jenkins
+          service jenkins start
+
+  JenkinsSSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allowing incoming on ssh port
+      SecurityGroupIngress:
+      - CidrIp:
+          "Fn::ImportValue": !Sub "${Project}-vpc-cidr"
+        IpProtocol: '-1'
+        FromPort: 0
+        ToPort: 0
+      - CidrIp:
+          "Fn::ImportValue": !Sub "${Project}-vpc-cidr"
+        IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+      VpcId:
+        "Fn::ImportValue": !Sub "${Project}-vpc-id"
+
+  JenkinsConnectionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allowing Jenkins client connection
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+      VpcId:
+        "Fn::ImportValue": !Sub "${Project}-vpc-id"
+
+  JenkinsDomainName:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Sub "${TraineeName}.${PublicHostedZoneName}"
+      HostedZoneName: !Ref PublicHostedZoneName
+      Comment: !Sub "DomainName - ${TraineeName}"
+      Type: CNAME
+      TTL: 300
+      ResourceRecords:
+      - !GetAtt 'JenkinsInstance.PublicDnsName'
