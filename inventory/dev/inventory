@@ -1,5 +1,5 @@
-[vpc]
-vpc.dev
+[networking]
+networking.dev
 
 [bastion]
 bastion.dev
