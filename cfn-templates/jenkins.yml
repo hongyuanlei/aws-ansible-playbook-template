@@ -19,21 +19,40 @@ Parameters:
     Description: The Instance type which used to build stack.
     Type: String
 
+  ASGMaxSize:
+    Description: AutoScaling max size
+    Type: Number
+    Default: 1
+
+  ASGMinSize:
+    Description: AutoScaling min size
+    Type: Number
+    Default: 1
+
 Resources:
-  JenkinsInstance:
-    Type: AWS::EC2::Instance
+  JenkinsASGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      SubnetId:
-        "Fn::ImportValue": !Sub "${Project}-public-subnet-a"
-      ImageId: !Ref AmiID
-      InstanceType: !Ref InstanceType
-      KeyName: !Ref Project
-      SecurityGroupIds:
-        - !Ref JenkinsSSHSecurityGroup
-        - !Ref JenkinsConnectionSecurityGroup
+      VPCZoneIdentifier:
+        - "Fn::ImportValue": !Sub "${Project}-public-subnet-a"
+        - "Fn::ImportValue": !Sub "${Project}-public-subnet-b"
+      LaunchConfigurationName: !Ref JenkinsASLaunchConf
+      MinSize: !Ref ASGMinSize
+      MaxSize: !Ref ASGMaxSize
       Tags:
         - Key: Name
           Value: !Sub "${Project}-jenkins-${TraineeName}"
+          PropagateAtLaunch: true
+
+  JenkinsASLaunchConf:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref AmiID
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref Project
+      SecurityGroups:
+      - !Ref JenkinsSSHSecurityGroup
+      - !Ref JenkinsConnectionSecurityGroup
       UserData:
         "Fn::Base64": !Sub |
           #!/bin/bash -ex
@@ -74,15 +93,3 @@ Resources:
         ToPort: 8080
       VpcId:
         "Fn::ImportValue": !Sub "${Project}-vpc-id"
-
-  JenkinsDomainName:
-    Type: AWS::Route53::RecordSet
-    DependsOn: [JenkinsInstance]
-    Properties:
-      Name: !Sub "${TraineeName}.${PublicHostedZoneName}"
-      HostedZoneName: !Ref PublicHostedZoneName
-      Comment: !Sub "DomainName - ${TraineeName}"
-      Type: CNAME
-      TTL: 300
-      ResourceRecords:
-      - !GetAtt 'JenkinsInstance.PublicDnsName'

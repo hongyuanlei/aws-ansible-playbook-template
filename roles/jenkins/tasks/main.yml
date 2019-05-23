@@ -14,5 +14,7 @@
         PublicHostedZoneName: "{{public_hosted_zone_name}}."
         AmiID: "{{ami_id}}"
         InstanceType: "{{instance_type}}"
+        ASGMaxSize: "{{asg_max_size}}"
+        ASGMinSize: "{{asg_min_size}}"
       tags:
         Project: "{{project}}"
