@@ -1,0 +1,6 @@
+---
+- hosts: jenkins
+  connection: local
+  gather_facts: False
+  roles:
+    - jenkins
