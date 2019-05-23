@@ -3,3 +3,6 @@ networking.dev
 
 [bastion]
 bastion.dev
+
+[jenkins]
+jenkins.dev

@@ -1,0 +1,18 @@
+---
+  - name: jenksin
+    cloudformation:
+      stack_name: "{{project}}-jenkins-{{trainee_name}}"
+      state: present
+      region: "{{aws_region}}"
+      disable_rollback: true
+      termination_protection: true
+      template: "cfn-templates/jenkins.yml"
+      stack_policy: "policies/cloudformation/stack-policy.json"
+      template_parameters:
+        Project: "{{project}}"
+        TraineeName: "{{trainee_name}}"
+        PublicHostedZoneName: "{{public_hosted_zone_name}}."
+        AmiID: "{{ami_id}}"
+        InstanceType: "{{instance_type}}"
+      tags:
+        Project: "{{project}}"
