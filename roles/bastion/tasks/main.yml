@@ -11,6 +11,6 @@
       template_parameters:
         Project: "{{project}}"
         AmiID: "{{ami_id}}"
-        PublicHostedZoneName: "{{public_hosted_zone}}."
+        PublicHostedZoneName: "{{public_hosted_zone_name}}."
       tags:
         Project: "{{project}}"
