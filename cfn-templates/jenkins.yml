@@ -124,6 +124,7 @@ Resources:
           rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
           yum install -y jenkins
           service jenkins start
+          /opt/aws/bin/cfn-signal -e 0 -r "Jenkins instance Stack Complete." '${WaitHandle}'
 
   JenkinsSSHSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -155,3 +156,11 @@ Resources:
       VpcId:
         "Fn::ImportValue": !Sub "${Project}-vpc-id"
 
+  WaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+
+  WaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: 1500
