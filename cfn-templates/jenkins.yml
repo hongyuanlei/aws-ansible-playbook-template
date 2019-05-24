@@ -164,3 +164,14 @@ Resources:
     Properties:
       Handle: !Ref WaitHandle
       Timeout: 1500
+
+  JenkinsDomainName:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Sub "${TraineeName}.${PublicHostedZoneName}"
+      HostedZoneName: !Ref PublicHostedZoneName
+      Comment: !Sub "DomainName - ${TraineeName}"
+      Type: CNAME
+      TTL: 300
+      ResourceRecords:
+      - !GetAtt LoadBalancer.DNSName
