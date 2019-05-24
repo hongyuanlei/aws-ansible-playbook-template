@@ -93,8 +93,8 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - "Fn::ImportValue": !Sub "${Project}-public-subnet-a"
-        - "Fn::ImportValue": !Sub "${Project}-public-subnet-b"
+        - "Fn::ImportValue": !Sub "${Project}-private-subnet-a"
+        - "Fn::ImportValue": !Sub "${Project}-private-subnet-b"
       LaunchConfigurationName: !Ref JenkinsASLaunchConf
       MinSize: !Ref ASGMinSize
       MaxSize: !Ref ASGMaxSize
