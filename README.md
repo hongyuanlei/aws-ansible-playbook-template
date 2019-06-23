@@ -33,9 +33,9 @@ $ ssh-add ~/.ssh/aws-architecture-workshop.pem && ssh -A ec2-user@bastion.aws-ar
 
 ### EC2 Instance In Public Subnet
 
+在运行cloudformation之前，需要修改`inventory/dev/group_vars/all.yml`中的`trainee_name`，否则会出现cloudformation stack重名的问题。
 
 ![aws-ec2-instance-in-public-subnent](https://user-images.githubusercontent.com/7569085/59973698-b217fd00-95d5-11e9-9d24-1e38d67aa9f5.png)
-
 
 ```
 $ git checkout jenkins-instance
@@ -51,8 +51,6 @@ $ docker run --rm -it \
 ### ASG In Public Subnet
 
 ![aws-public-subnet](https://user-images.githubusercontent.com/7569085/59860508-8d434000-93b1-11e9-9a54-bb8e914febae.png)
-
-在运行cloudformation之前，需要修改`inventory/dev/group_vars/all.yml`中的`trainee_name`，否则会出现cloudformation stack重名的问题。
 
 ```
 $ git checkout jenkins-auto-scaling-in-public-subnet
