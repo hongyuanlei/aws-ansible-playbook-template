@@ -10,6 +10,8 @@
 
 #### How to run create it?
 
+在开始之前，你需要手动在AWS Web Console上创建名为: `aws-architecture-workshop`的key，下载后分发给所有学员。
+
 ```
 $ git checkout master
 
