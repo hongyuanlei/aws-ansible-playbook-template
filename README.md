@@ -6,6 +6,8 @@
 
 ### 环境准备(VPC & Bastion)
 
+在环境准备中将会创建VPC和Bastion，此部分只需要活动组织者运行一次即可。
+
 ![aws-vpc-and-bastion](https://user-images.githubusercontent.com/7569085/59823400-b7204680-9360-11e9-9b3f-b8ec58bc5e79.png)
 
 #### How to run create it?
@@ -48,9 +50,9 @@ $ docker run --rm -it \
 
 ### ASG In Public Subnet
 
-
 ![aws-public-subnet](https://user-images.githubusercontent.com/7569085/59860508-8d434000-93b1-11e9-9a54-bb8e914febae.png)
 
+在运行cloudformation之前，需要修改`inventory/dev/group_vars/all.yml`中的`trainee_name`，否则会出现cloudformation stack重名的问题。
 
 ```
 $ git checkout jenkins-auto-scaling-in-public-subnet
@@ -81,7 +83,6 @@ $ docker run --rm -it \
 ### ALB + ASG In Private Subnet
 
 ![aws-alb-private-subent](https://user-images.githubusercontent.com/7569085/59860504-8caaa980-93b1-11e9-87eb-bd60e4236fa2.png)
-
 
 ```
 $ git checkout jenkins-alb-auto-scaling-private
